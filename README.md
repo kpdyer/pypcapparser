@@ -3,6 +3,10 @@ pypcapparser
 
 a pcap-parsing library
 
+### Dependencies
+
+* http-parser: https://pypi.python.org/pypi/http-parser
+
 ### Example Usage
 
 ```python
