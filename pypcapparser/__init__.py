@@ -14,23 +14,21 @@ dports_ = []
 session_start_ = -1
 session_end_ = -1
 
+CONTENT_LENGTH_HEADER = 'Content-Length'
+
 def parse_without_content_length(http_stream):
     http_message = http_stream.partition('\r\n\r\n')[0] + '\r\n\r\n'
     http_stream = http_stream.partition('\r\n\r\n')[2]
     return (http_message, http_stream)
 
 def parse_with_content_length(http_stream):
-    p = HttpParser()
-    p.execute(http_stream, len(http_stream))
-    headers = p.get_headers()
-    body = p.recv_body()
-
-    if 'CONTENT-LENGTH' in headers:
-        body_length = int(headers['CONTENT-LENGTH'])
-    else:
-        body_length = len(body)
-
     http_message_headers = http_stream.partition('\r\n\r\n')[0] + '\r\n\r\n'
+    body = http_stream.partition('\r\n\r\n')[2]
+
+    for http_header in http_message_headers.split('\n'):
+        if http_header.startswith(CONTENT_LENGTH_HEADER):
+            body_length = int(http_header.split(':')[1])
+
     http_message_body = body[:body_length]
     http_message = http_message_headers + http_message_body
     http_stream = body[body_length:]
@@ -38,11 +36,8 @@ def parse_with_content_length(http_stream):
     return (http_message, http_stream)
 
 def is_content_length_in_message(http_stream):
-    p = HttpParser()
-    p.execute(http_stream, len(http_stream))
-    headers = p.get_headers()
-    return ('CONTENT-LENGTH' in headers)
-
+    http_message = http_stream.partition('\r\n\r\n')[0]
+    return (CONTENT_LENGTH_HEADER in http_message)
 
 def get_first_message(http_stream):
     content_length_in_first_message = is_content_length_in_message(http_stream)
