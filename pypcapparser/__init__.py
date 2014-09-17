@@ -2,8 +2,6 @@
 
 import nids
 
-from http_parser.parser import HttpParser
-
 TCP = "tcp"
 HTTP_PORTS = [80, 8080]
 
